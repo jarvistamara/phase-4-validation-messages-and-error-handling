@@ -13,19 +13,45 @@ function MovieForm() {
     discount: false,
     female_director: false,
   });
+  const [errors, setErrors] = useState([]);
 
-  function handleSubmit(e) {
+    // make the function async to enable the await keyword
+  async function handleSubmit(e) {
     e.preventDefault();
-    fetch("/movies", {
+    // fetch returns a Promise, we must await it
+    const response = await fetch("/movies", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((newMovie) => console.log(newMovie));
-  }
+    });
+    // response.json() returns a Promise, we must await it
+    const data = await response.json();
+    if (response.ok) {
+      console.log("Movie created:", data);
+    } else {
+      setErrors(data.errors);
+    }
+  } 
+
+  // function handleSubmit(e) {
+  //   e.preventDefault();
+  //   fetch("/movies", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify(formData),
+  //   })
+  //   .then((response) => {
+  //     if (response.ok) {
+  //       response.json().then((newMovie) => console.log(newMovie));
+  //     } else {
+  //       response.json().then((errorData) => setErrors(errorData.errors));
+  //     }
+  //   }) 
+  // }
 
   function handleChange(e) {
     const value =
@@ -38,6 +64,7 @@ function MovieForm() {
 
   return (
     <Wrapper>
+      
       <form onSubmit={handleSubmit}>
         <FormGroup>
           <label htmlFor="title">Title</label>
@@ -125,6 +152,13 @@ function MovieForm() {
             />
           </label>
         </FormGroup>
+        {errors.length > 0 && (
+          <ul style={{ color: "red" }}>
+            {errors.map((error) => (
+              <li key={error}>{error}</li>
+            ))}
+          </ul>
+        )} 
         <SubmitButton type="submit">Add Movie</SubmitButton>
       </form>
     </Wrapper>
